@@ -185,21 +185,33 @@ end
 
 fprintf('Remaining plies: %d\n\n', length(activePlies));
 
-%% --- Prepreg Waste Area ---
-margin_mm = 12.7;
-panelWidth_mm  = specimenWidth  + 2*margin_mm;
-panelLength_mm = specimenLength + 2*margin_mm;
+%% --- Prepreg Area (angle-dependent bounding box) ---
+% Panel holds 4 specimens side-by-side along the width direction,
+% with a 0.5 in (12.7 mm) margin on every edge.
+margin_mm      = 12.7;
+panelWidth_mm  = 4 * specimenWidth + 2*margin_mm;   % 4 strips across
+panelLength_mm = specimenLength    + 2*margin_mm;
 
-prepregArea_mm2 = panelWidth_mm * panelLength_mm * 4 * numPlies;
+% For each ply at angle theta, cutting from a 0-deg prepreg roll requires
+% a bounding rectangle larger than the panel itself. Sum over all plies.
+prepregArea_mm2 = 0;
+for k = 1:numPlies
+    c = abs(cosd(layup(k)));
+    s = abs(sind(layup(k)));
+    bb_w = panelWidth_mm * c + panelLength_mm * s;
+    bb_l = panelWidth_mm * s + panelLength_mm * c;
+    prepregArea_mm2 = prepregArea_mm2 + bb_w * bb_l;
+end
 prepregArea_cm2 = prepregArea_mm2 / 100;
 
 fprintf('Prepreg Area Required: %.1f cm²\n', prepregArea_cm2);
 
 %% --- Summary ---
 fprintf('\n=== SUMMARY ===\n');
-fprintf('Flexural Modulus: %.2f GPa\n', Ef_GPa);
-fprintf('Tensile Modulus: %.2f GPa\n', Ex_GPa);
+fprintf('Flexural Modulus: %.2f GPa  (target: %g GPa, error: %.1f%%)\n', Ef_GPa, targetFlexuralModulus, errorPercent);
+fprintf('Tensile Modulus:  %.2f GPa\n', Ex_GPa);
 fprintf('Ultimate Strength: %.1f MPa\n', ultimateStrength_MPa);
+fprintf('Prepreg Area:     %.1f cm²\n', prepregArea_cm2);
 
 
 %% --- ABD helper ---
