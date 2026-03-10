@@ -1,0 +1,18 @@
+# MATLAB autosave files
+*.asv
+
+# MATLAB compiled files
+*.mex*
+*.mexw64
+*.mexmaci64
+*.mexglx
+
+# Simulink generated files
+slprj/
+*.slxc
+
+# Published output
+html/
+
+# Figure exports
+*.fig
